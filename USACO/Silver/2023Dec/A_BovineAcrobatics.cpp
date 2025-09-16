@@ -9,40 +9,49 @@ typedef long long ll;
 signed main() {
     IOS;
     ll n, m, k; cin >> n >> m >> k;
-    vector<vector<ll>> cows(n);
+    vector<vector<ll>> cows;
+    ll tot = 0;
     for (ll i = 0; i < n; i++) {
         ll w, a; cin >> w >> a;
         cows.push_back({w, a});
+        tot += a;
     }
 
-    sort(cows.rbegin(), cows.rend());
+    sort(cows.begin(), cows.end());
 
-    ll ans = 0;
-    priority_queue<vector<ll>> pq;
-    pq.push({(ll)2e9, m});
+    vector<vector<ll>> q;
+    ll qi = 0;
+    ll toss = 0;
     for (ll i = 0; i < n; i++) {
         ll w = cows[i][0], a = cows[i][1];
-        
-        while (a > 0) {
-            auto data = pq.top();
-            ll w1 = data[0], a1 = data[1];
-            if (w + k <= w1) {
-                pq.pop();
-                if (a < a1) {
-                    pq.push({w, a});
-                    pq.push({w1, a1-a});
-                }
-                else {
-                    pq.push({w, a1});
-                }
-                ans += min(a, a1);
-                a -= a1;
+        if (m >= a) {
+            q.push_back({w, a});
+            m -= a;
+            continue;
+        }
+        else if (m > 0) {
+            q.push_back({w, m});
+            a -= m;
+            cows[i][1] -= m;
+            m = 0;
+        }
+
+        ll u = q[qi][0], cnt = q[qi][1];
+        while (u + k <= w && a > 0) {
+            if (cnt > a) {
+                q[qi][1] -= a;
+                a = 0;
             }
             else {
-                break;
+                a -= cnt;
+                qi++;
+                if (qi == q.size()) break;
+                u = q[qi][0], cnt = q[qi][1];
             }
         }
+        q.push_back({w, cows[i][1] - a});
+        toss += a;
     }
 
-    cout << ans << endl;
+    cout << tot - toss << endl;
 }
